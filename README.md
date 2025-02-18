@@ -14,4 +14,5 @@ curl localhost:8080
 ```
 
 A apliacao estará disponivel em `http://localhost:8080`
+
 O banco de dados estará disponivel em `http://localhost:5432`
