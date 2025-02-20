@@ -13,7 +13,9 @@ permissions:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
+    env:
+      MIN_COVERAGE: 80
+      
     steps:
     - uses: actions/checkout@v3
 
@@ -36,8 +38,8 @@ jobs:
       with:
         paths: ${{ github.workspace }}/target/site/jacoco/jacoco.xml
         token: ${{ secrets.GITHUB_TOKEN }}
-        min-coverage-overall: 80
-        min-coverage-changed-files: 80
+        min-coverage-overall: ${{ env.MIN_COVERAGE }}
+        min-coverage-changed-files: ${{ env.MIN_COVERAGE }}
         title: '# 📊 Coverage Report'
         update-comment: true
         pass-emoji: ':green_circle:'
@@ -55,3 +57,10 @@ jobs:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
+
+    - name: Fail PR if overall coverage is less than ${{ env.MIN_COVERAGE }}%
+      if: ${{ steps.jacoco.outputs.coverage-overall < env.MIN_COVERAGE }}
+      uses: actions/github-script@v6
+      with:
+        script: |
+          core.setFailed('Overall coverage is less than ${{ env.MIN_COVERAGE }}%!')
